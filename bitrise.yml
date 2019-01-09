@@ -18,10 +18,21 @@ workflows:
     - go-test:
     
   test:
-    title: Test simple android project & mono repo projects
     before_run:
     - audit-this-step
     - go-tests
+    after_run:
+    - test_app
+    - test_another_app
+
+  test_xcode_8:
+    before_run:
+    - audit-this-step
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
     after_run:
     - test_app
     - test_another_app
