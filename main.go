@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	apkEnvKey          = "BITRISE_APK_PATH"
-	testApkEnvKey      = "BITRISE_TEST_APK_PATH"
-	mappingFileEnvKey  = "BITRISE_MAPPING_PATH"
-	mappingFilePattern = "*build/*/mapping.txt"
+	apkEnvKey         = "BITRISE_APK_PATH"
+	testApkEnvKey     = "BITRISE_TEST_APK_PATH"
+	mappingFileEnvKey = "BITRISE_MAPPING_PATH"
+	testSuffix        = "AndroidTest"
 )
 
 // Configs ...
@@ -95,7 +95,7 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 		for _, v := range variants {
 			if strings.ToLower(v) == strings.ToLower(variant) {
 				appVariant = v
-			} else if strings.ToLower(v) == strings.ToLower(variant+"AndroidTest") {
+			} else if strings.ToLower(v) == strings.ToLower(variant+testSuffix) {
 				testVariant = v
 			}
 		}
@@ -106,7 +106,7 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	}
 
 	if testVariant == "" {
-		return nil, fmt.Errorf("variant: %s not found in %s module", variant+"AndroidTest", module)
+		return nil, fmt.Errorf("variant: %s not found in %s module", variant+testSuffix, module)
 	}
 
 	filteredVariants[module] = []string{appVariant, testVariant}
@@ -119,7 +119,7 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 	testVariants := gradle.Variants{}
 	for _, variants := range variantsMap {
 		for _, v := range variants {
-			if strings.HasSuffix(strings.ToLower(v), strings.ToLower("AndroidTest")) {
+			if strings.HasSuffix(strings.ToLower(v), strings.ToLower(testSuffix)) {
 				testVariants[module] = append(testVariants[module], v)
 			} else {
 				appVariants[module] = append(appVariants[module], v)
@@ -129,8 +129,8 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 
 	variantPars := gradle.Variants{}
 	for _, appVariant := range appVariants[module] {
-		if sliceutil.IsStringInSlice(appVariant+"AndroidTest", testVariants[module]) {
-			variantPars[module] = append(variantPars[module], []string{appVariant, appVariant + "AndroidTest"}...)
+		if sliceutil.IsStringInSlice(appVariant+testSuffix, testVariants[module]) {
+			variantPars[module] = append(variantPars[module], []string{appVariant, appVariant + testSuffix}...)
 		}
 	}
 
