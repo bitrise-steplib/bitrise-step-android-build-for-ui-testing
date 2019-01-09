@@ -127,14 +127,14 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 		}
 	}
 
-	variantPars := gradle.Variants{}
+	variantPairs := gradle.Variants{}
 	for _, appVariant := range appVariants[module] {
 		if sliceutil.IsStringInSlice(appVariant+testSuffix, testVariants[module]) {
-			variantPars[module] = append(variantPars[module], []string{appVariant, appVariant + testSuffix}...)
+			variantPairs[module] = append(variantPairs[module], []string{appVariant, appVariant + testSuffix}...)
 		}
 	}
 
-	return variantPars, nil
+	return variantPairs, nil
 }
 
 func mainE(config Configs) error {
