@@ -19,15 +19,15 @@ import (
 )
 
 const (
-	apkEnvKey     = "BITRISE_APK_PATH"
-	testApkEnvKey = "BITRISE_TEST_APK_PATH"
-	testSuffix    = "AndroidTest"
+	apkEnvKey      = "BITRISE_APK_PATH"
+	testApkEnvKey  = "BITRISE_TEST_APK_PATH"
+	testSuffix     = "AndroidTest"
+	apkPathPattern = "*/build/outputs/apk/*.apk"
 )
 
 // Configs ...
 type Configs struct {
 	ProjectLocation string `env:"project_location,dir"`
-	APKPathPattern  string `env:"apk_path_pattern"`
 	Variant         string `env:"variant,required"`
 	Module          string `env:"module,required"`
 	Arguments       string `env:"arguments"`
@@ -204,15 +204,9 @@ func mainE(config Configs) error {
 	log.Infof("Export APKs:")
 	fmt.Println()
 
-	apks, err := getArtifacts(gradleProject, started, config.APKPathPattern, false)
+	apks, err := getArtifacts(gradleProject, started, apkPathPattern, false)
 	if err != nil {
 		return fmt.Errorf("failed to find apks, error: %v", err)
-	}
-
-	if len(apks) == 0 {
-		log.Warnf("No apks found with pattern: %s", config.APKPathPattern)
-		log.Warnf("If you have changed default APK export path in your gradle files then you might need to change APKPathPattern accordingly.")
-		return nil
 	}
 
 	exportedArtifactPaths, err := exportArtifacts(apks, config.DeployDir)
