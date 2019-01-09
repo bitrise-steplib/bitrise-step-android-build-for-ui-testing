@@ -236,11 +236,11 @@ func mainE(config Configs) error {
 	}
 
 	if exportedAppArtifact == "" {
-		return fmt.Errorf("Could not export app APK")
+		return fmt.Errorf("Could not find the exported app APK")
 	}
 
 	if exportedTestArtifact == "" {
-		return fmt.Errorf("Could not export test APK")
+		return fmt.Errorf("Could not find the exported test APK")
 	}
 
 	fmt.Println()
