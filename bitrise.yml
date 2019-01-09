@@ -7,6 +7,7 @@ app:
   - BITRISE_STEP_VERSION: "0.0.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
+  - BITRISE_SAMPLE_APP: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
 
 workflows:
   go-tests:
@@ -19,30 +20,31 @@ workflows:
   test:
     title: Test simple android project & mono repo projects
     before_run:
-    # - audit-this-step
-    # - go-tests
+    - audit-this-step
+    - go-tests
     after_run:
-    - simple-and-mono-repo-in-src-dir
+    - test_app
+    - test_another_app
 
-  simple-and-mono-repo-in-src-dir:
+  test_app:
     title: Test simple android project & mono repo projects in source dir
     steps:
-    # - script:
-    #     inputs:
-    #     - content: rm -rf _tmp
+    - script:
+        inputs:
+        - content: rm -rf _tmp
     - change-workdir:
         title: cd $BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
         - path: ./_tmp
         - is_create_path: true
-    # - script:
-    #     inputs:
-    #     - content: git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - script:
+        inputs:
+        - content: git clone -b flavors $BITRISE_SAMPLE_APP .
     - path::./:
         title: Test simple android project
         inputs:
-        - project_location: $BITRISE_SOURCE_DIR/android-sample
+        - project_location: $BITRISE_SOURCE_DIR
         - module: app
         - variant: DemoDebug
     - script:
@@ -53,8 +55,38 @@ workflows:
             set -ex
 
             if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
-            if [ -z "$BITRISE_APK_PATH_LIST" ] ; then echo "BITRISE_APK_PATH_LIST env is empty" ; exit 1 ; fi ;
-            if [ -z "$BITRISE_MAPPING_PATH" ] ; then echo "BITRISE_MAPPING_PATH env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
+
+  test_another_app:
+    title: Test simple android project & mono repo projects in source dir
+    steps:
+    - script:
+        inputs:
+        - content: rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: git clone -b flavors $BITRISE_SAMPLE_APP .
+    - path::./:
+        title: Test simple android project
+        inputs:
+        - project_location: $BITRISE_SOURCE_DIR
+        - module: another_app
+        - variant: AnotherDemoDebug
+    - script:
+        title: Check outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
 
 
   # ----------------------------------------------------------------

@@ -19,10 +19,9 @@ import (
 )
 
 const (
-	apkEnvKey         = "BITRISE_APK_PATH"
-	testApkEnvKey     = "BITRISE_TEST_APK_PATH"
-	mappingFileEnvKey = "BITRISE_MAPPING_PATH"
-	testSuffix        = "AndroidTest"
+	apkEnvKey     = "BITRISE_APK_PATH"
+	testApkEnvKey = "BITRISE_TEST_APK_PATH"
+	testSuffix    = "AndroidTest"
 )
 
 // Configs ...
@@ -91,13 +90,11 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	filteredVariants := gradle.Variants{}
 	var testVariant string
 	var appVariant string
-	for _, variants := range variantsMap {
-		for _, v := range variants {
-			if strings.ToLower(v) == strings.ToLower(variant) {
-				appVariant = v
-			} else if strings.ToLower(v) == strings.ToLower(variant+testSuffix) {
-				testVariant = v
-			}
+	for _, v := range variantsMap[module] {
+		if strings.ToLower(v) == strings.ToLower(variant) {
+			appVariant = v
+		} else if strings.ToLower(v) == strings.ToLower(variant+testSuffix) {
+			testVariant = v
 		}
 	}
 
@@ -117,13 +114,11 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle.Variants, error) {
 	appVariants := gradle.Variants{}
 	testVariants := gradle.Variants{}
-	for _, variants := range variantsMap {
-		for _, v := range variants {
-			if strings.HasSuffix(strings.ToLower(v), strings.ToLower(testSuffix)) {
-				testVariants[module] = append(testVariants[module], v)
-			} else {
-				appVariants[module] = append(appVariants[module], v)
-			}
+	for _, v := range variantsMap[module] {
+		if strings.HasSuffix(strings.ToLower(v), strings.ToLower(testSuffix)) {
+			testVariants[module] = append(testVariants[module], v)
+		} else {
+			appVariants[module] = append(appVariants[module], v)
 		}
 	}
 
