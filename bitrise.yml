@@ -30,8 +30,6 @@ workflows:
     - audit-this-step
     steps:
     - go-list:
-    - golint:
-    - errcheck:
     - go-test:
     after_run:
     - test_app
