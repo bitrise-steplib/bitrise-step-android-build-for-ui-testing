@@ -1,0 +1,69 @@
+format_version: 6
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - BITRISE_STEP_ID: android-build-for-ui-testing
+  - BITRISE_STEP_VERSION: "0.0.1"
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing.git
+  - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
+
+workflows:
+  go-tests:
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    
+  test:
+    title: Test simple android project & mono repo projects
+    before_run:
+    # - audit-this-step
+    # - go-tests
+    after_run:
+    - simple-and-mono-repo-in-src-dir
+
+  simple-and-mono-repo-in-src-dir:
+    title: Test simple android project & mono repo projects in source dir
+    steps:
+    # - script:
+    #     inputs:
+    #     - content: rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    # - script:
+    #     inputs:
+    #     - content: git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - path::./:
+        title: Test simple android project
+        inputs:
+        - project_location: $BITRISE_SOURCE_DIR/android-sample
+        - module: app
+        - variant: DemoDebug
+    - script:
+        title: Check outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_APK_PATH_LIST" ] ; then echo "BITRISE_APK_PATH_LIST env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_MAPPING_PATH" ] ; then echo "BITRISE_MAPPING_PATH env is empty" ; exit 1 ; fi ;
+
+
+  # ----------------------------------------------------------------
+  # --- workflows to Share this step into a Step Library
+  audit-this-step:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            stepman audit --step-yml ./step.yml
