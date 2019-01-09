@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ import (
 
 const (
 	apkEnvKey          = "BITRISE_APK_PATH"
-	apkListEnvKey      = "BITRISE_APK_PATH_LIST"
+	testApkEnvKey      = "BITRISE_TEST_APK_PATH"
 	mappingFileEnvKey  = "BITRISE_MAPPING_PATH"
 	mappingFilePattern = "*build/*/mapping.txt"
 )
@@ -160,6 +161,7 @@ func mainE(config Configs) error {
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
+		// List all the variants if there is an error
 		for module, variants := range variants {
 			log.Printf("%s:", module)
 			for _, variant := range variants {
@@ -171,6 +173,7 @@ func mainE(config Configs) error {
 		return fmt.Errorf("Failed to find buildable variants, error: %s", err)
 	}
 
+	// List the variants only which has (Build - AndroidTest) variant pair
 	for module, variants := range variantPairs {
 		log.Printf("%s:", module)
 		for _, variant := range variants {
@@ -222,62 +225,42 @@ func mainE(config Configs) error {
 		return fmt.Errorf("Failed to export artifact: %v", err)
 	}
 
-	if len(exportedArtifactPaths) == 0 {
-		return fmt.Errorf("Could not export any APKs")
+	var exportedAppArtifact string
+	var exportedTestArtifact string
+	for _, pth := range exportedArtifactPaths {
+		if strings.HasSuffix(strings.ToLower(path.Base(pth)), strings.ToLower("AndroidTest.apk")) {
+			exportedTestArtifact = pth
+		} else {
+			exportedAppArtifact = pth
+		}
 	}
 
-	lastExportedArtifact := exportedArtifactPaths[len(exportedArtifactPaths)-1]
+	if exportedAppArtifact == "" {
+		return fmt.Errorf("Could not export app APK")
+	}
+
+	if exportedTestArtifact == "" {
+		return fmt.Errorf("Could not export test APK")
+	}
 
 	fmt.Println()
-	if err := tools.ExportEnvironmentWithEnvman(apkEnvKey, lastExportedArtifact); err != nil {
+	if err := tools.ExportEnvironmentWithEnvman(apkEnvKey, exportedAppArtifact); err != nil {
 		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
 	}
-	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", apkEnvKey, filepath.Base(lastExportedArtifact))
+	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", apkEnvKey, filepath.Base(exportedAppArtifact))
+
+	if err := tools.ExportEnvironmentWithEnvman(testApkEnvKey, exportedTestArtifact); err != nil {
+		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
+	}
+	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", testApkEnvKey, filepath.Base(exportedTestArtifact))
 
 	var paths, sep string
 	for _, path := range exportedArtifactPaths {
 		paths += sep + "$BITRISE_DEPLOY_DIR/" + filepath.Base(path)
 		sep = "| \\\n" + strings.Repeat(" ", 11)
 	}
-
-	if err := tools.ExportEnvironmentWithEnvman(apkListEnvKey, strings.Join(exportedArtifactPaths, "|")); err != nil {
-		return fmt.Errorf("Failed to export environment variable: %s", apkListEnvKey)
-	}
-	log.Printf("  Env    [ $%s = %s ]", apkListEnvKey, paths)
-
 	fmt.Println()
 
-	log.Infof("Export mapping files:")
-	fmt.Println()
-
-	mappings, err := getArtifacts(gradleProject, started, mappingFilePattern, true)
-	if err != nil {
-		log.Warnf("Failed to find mapping files, error: %v", err)
-		return nil
-	}
-
-	if len(mappings) == 0 {
-		log.Printf("No mapping files found with pattern: %s", mappingFilePattern)
-		log.Printf("You might have changed default mapping file export path in your gradle files or obfuscation is not enabled in your project.")
-		return nil
-	}
-
-	exportedArtifactPaths, err = exportArtifacts(mappings, config.DeployDir)
-	if err != nil {
-		return fmt.Errorf("Failed to export artifact: %v", err)
-	}
-
-	if len(exportedArtifactPaths) == 0 {
-		return fmt.Errorf("Could not export any mapping.txt")
-	}
-
-	lastExportedArtifact = exportedArtifactPaths[len(exportedArtifactPaths)-1]
-
-	fmt.Println()
-	if err := tools.ExportEnvironmentWithEnvman(mappingFileEnvKey, lastExportedArtifact); err != nil {
-		return fmt.Errorf("Failed to export environment variable: %s", mappingFileEnvKey)
-	}
-	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", mappingFileEnvKey, filepath.Base(lastExportedArtifact))
 	return nil
 }
 
