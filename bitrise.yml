@@ -50,6 +50,7 @@ workflows:
     - script:
         inputs:
         - content: git clone -b flavors $BITRISE_SAMPLE_APP .
+    - install-missing-android-tools@2.3.4: {}
     - path::./:
         title: Test simple android project
         inputs:
@@ -81,6 +82,7 @@ workflows:
     - script:
         inputs:
         - content: git clone -b flavors $BITRISE_SAMPLE_APP .
+    - install-missing-android-tools@2.3.4: {}
     - path::./:
         title: Test simple android project
         inputs:
