@@ -108,7 +108,6 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 
 // androidTestVariantPairs returns (build - AndroidTest) variant pairs
 func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle.Variants, error) {
-	fmt.Printf("variantsMap: %+v", variantsMap)
 	appVariants := gradle.Variants{}
 	testVariants := gradle.Variants{}
 	for _, v := range variantsMap[module] {
