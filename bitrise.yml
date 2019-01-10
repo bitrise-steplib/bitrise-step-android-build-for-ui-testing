@@ -101,6 +101,25 @@ workflows:
             if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
             if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
 
+            
+  # ----------------------------------------------------------------
+  # --- Utility workflows
+
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
+
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library
