@@ -1,0 +1,130 @@
+format_version: 6
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing.git
+  - BITRISE_SAMPLE_APP: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
+
+workflows:
+  go-tests:
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    
+  test:
+    before_run:
+    - audit-this-step
+    - go-tests
+    after_run:
+    - test_app
+    - test_another_app
+
+  test_xcode_8:
+    before_run:
+    - audit-this-step
+    steps:
+    - go-list:
+    - go-test:
+    after_run:
+    - test_app
+    - test_another_app
+
+  test_app:
+    title: Test simple android project & mono repo projects in source dir
+    steps:
+    - script:
+        inputs:
+        - content: rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: git clone -b flavors $BITRISE_SAMPLE_APP .
+    - install-missing-android-tools@2.3.4:
+        run_if: .IsCI
+    - path::./:
+        title: Test simple android project
+        inputs:
+        - project_location: $BITRISE_SOURCE_DIR
+        - module: app
+        - variant: DemoDebug
+    - script:
+        title: Check outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
+
+  test_another_app:
+    title: Test simple android project & mono repo projects in source dir
+    steps:
+    - script:
+        inputs:
+        - content: rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: git clone -b flavors $BITRISE_SAMPLE_APP .
+    - install-missing-android-tools@2.3.4:
+        run_if: .IsCI
+    - path::./:
+        title: Test simple android project
+        inputs:
+        - project_location: $BITRISE_SOURCE_DIR
+        - module: another_app
+        - variant: AnotherDemoDebug
+    - script:
+        title: Check outputs
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+
+            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
+            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
+
+
+  # ----------------------------------------------------------------
+  # --- Utility workflows
+
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
+
+
+  # ----------------------------------------------------------------
+  # --- workflows to Share this step into a Step Library
+  audit-this-step:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            stepman audit --step-yml ./step.yml
