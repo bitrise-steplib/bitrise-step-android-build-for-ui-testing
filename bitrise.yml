@@ -3,10 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - BITRISE_STEP_ID: android-build-for-ui-testing
-  - BITRISE_STEP_VERSION: "0.0.1"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing.git
-  - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - BITRISE_SAMPLE_APP: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
 
 workflows:
@@ -101,7 +98,7 @@ workflows:
             if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
             if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
 
-            
+
   # ----------------------------------------------------------------
   # --- Utility workflows
 

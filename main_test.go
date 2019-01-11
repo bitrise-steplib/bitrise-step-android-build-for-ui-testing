@@ -67,11 +67,13 @@ func noAndroidTestVariantsMap() gradle.Variants {
 func wantOneAndroidTestForApp() gradle.Variants {
 	want := gradle.Variants{}
 	want["app"] = []string{"DemoDebug", "DemoDebugAndroidTest"}
+	want["another_app"] = []string{"AnotherDemoDebug", "AnotherDemoDebugAndroidTest"}
 	return want
 }
 
 func wantOneAndroidTestForAnotherApp() gradle.Variants {
 	want := gradle.Variants{}
+	want["app"] = []string{"DemoDebug", "DemoDebugAndroidTest"}
 	want["another_app"] = []string{"AnotherDemoDebug", "AnotherDemoDebugAndroidTest"}
 	return want
 }

@@ -19,15 +19,15 @@ import (
 )
 
 const (
-	apkEnvKey      = "BITRISE_APK_PATH"
-	testApkEnvKey  = "BITRISE_TEST_APK_PATH"
-	testSuffix     = "AndroidTest"
-	apkPathPattern = "*/build/outputs/apk/*.apk"
+	apkEnvKey     = "BITRISE_APK_PATH"
+	testApkEnvKey = "BITRISE_TEST_APK_PATH"
+	testSuffix    = "AndroidTest"
 )
 
 // Configs ...
 type Configs struct {
 	ProjectLocation string `env:"project_location,dir"`
+	APKPathPattern  string `env:"apk_path_pattern"`
 	Variant         string `env:"variant,required"`
 	Module          string `env:"module,required"`
 	Arguments       string `env:"arguments"`
@@ -110,18 +110,22 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle.Variants, error) {
 	appVariants := gradle.Variants{}
 	testVariants := gradle.Variants{}
-	for _, v := range variantsMap[module] {
-		if strings.HasSuffix(strings.ToLower(v), strings.ToLower(testSuffix)) {
-			testVariants[module] = append(testVariants[module], v)
-		} else {
-			appVariants[module] = append(appVariants[module], v)
+	for m, variants := range variantsMap {
+		for _, v := range variants {
+			if strings.HasSuffix(strings.ToLower(v), strings.ToLower(testSuffix)) {
+				testVariants[m] = append(testVariants[m], v)
+			} else {
+				appVariants[m] = append(appVariants[m], v)
+			}
 		}
 	}
 
 	variantPairs := gradle.Variants{}
-	for _, appVariant := range appVariants[module] {
-		if sliceutil.IsStringInSlice(appVariant+testSuffix, testVariants[module]) {
-			variantPairs[module] = append(variantPairs[module], []string{appVariant, appVariant + testSuffix}...)
+	for m, appVariant := range appVariants {
+		for _, variant := range appVariant {
+			if sliceutil.IsStringInSlice(variant+testSuffix, testVariants[m]) {
+				variantPairs[m] = append(variantPairs[m], []string{variant, variant + testSuffix}...)
+			}
 		}
 	}
 
@@ -138,7 +142,6 @@ func mainE(config Configs) error {
 		GetTask("assemble")
 
 	log.Infof("Variants:")
-	fmt.Println()
 
 	variants, err := buildTask.GetVariants()
 	if err != nil {
@@ -174,8 +177,8 @@ func mainE(config Configs) error {
 			}
 			log.Printf("- %s", variant)
 		}
+		fmt.Println()
 	}
-	fmt.Println()
 
 	started := time.Now()
 
@@ -187,7 +190,6 @@ func mainE(config Configs) error {
 	log.Infof("Run build:")
 	buildCommand := buildTask.GetCommand(filteredVariants, args...)
 
-	fmt.Println()
 	log.Donef("$ " + buildCommand.PrintableCommandArgs())
 	fmt.Println()
 
@@ -200,7 +202,7 @@ func mainE(config Configs) error {
 	log.Infof("Export APKs:")
 	fmt.Println()
 
-	apks, err := getArtifacts(gradleProject, started, apkPathPattern, false)
+	apks, err := getArtifacts(gradleProject, started, config.APKPathPattern, false)
 	if err != nil {
 		return fmt.Errorf("failed to find apks, error: %v", err)
 	}

@@ -1,7 +1,7 @@
 
 title: Android Build for UI Testing
-summary: Builds your Android project with gradle with the beloging AndroidTest variant.
-description: Builds your Android project with gradle with the beloging AndroidTest variant.
+summary: Builds your Android project with gradle with the belonging AndroidTest variant.
+description: Builds your Android project with gradle with the belonging AndroidTest variant.
 website: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing/issues
@@ -43,6 +43,13 @@ inputs:
         Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
       description: |
         Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
+      is_required: true
+  - apk_path_pattern: "*/build/outputs/apk/*.apk"
+    opts:
+      category: Options
+      title: APK location pattern
+      summary: Will find the APK files with the given pattern.
+      description: Will find the APK files with the given pattern.
       is_required: true
   - cache_level: "only_deps"
     opts:
