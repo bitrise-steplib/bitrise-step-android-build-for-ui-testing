@@ -30,11 +30,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b7f4121c012a711b0cf550226e47ace1b0731845dbb8c2f18315666e602068bf"
+  digest = "1:4490bcf821454642055ce07c60088276229717012434863fd172f31268eb6803"
   name = "github.com/bitrise-tools/go-android"
   packages = ["gradle"]
   pruneopts = "UT"
-  revision = "cad5a20e271b6a9667ca2063ec6286f51387b9e4"
+  revision = "8082fe069ed29f394c2fd0724dd6bdc64e5cf6b4"
 
 [[projects]]
   branch = "master"
@@ -57,12 +57,12 @@
   revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [[projects]]
-  digest = "1:0e792eea6c96ec55ff302ef33886acbaa5006e900fefe82689e88d96439dcd84"
+  digest = "1:6baa565fe16f8657cf93469b2b8a6c61a277827734400d27e44d589547297279"
   name = "github.com/ryanuber/go-glob"
   packages = ["."]
   pruneopts = "UT"
-  revision = "572520ed46dbddaed19ea3d9541bdd0494163693"
-  version = "v0.1"
+  revision = "51a8f68e6c24dc43f1e371749c89a267de4ebc53"
+  version = "v1.0.0"
 
 [solve-meta]
   analyzer-name = "dep"

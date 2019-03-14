@@ -47,7 +47,7 @@ workflows:
     - script:
         inputs:
         - content: git clone -b flavors $BITRISE_SAMPLE_APP .
-    - install-missing-android-tools@2.3.4:
+    - install-missing-android-tools:
         run_if: .IsCI
     - path::./:
         title: Test simple android project
@@ -80,7 +80,7 @@ workflows:
     - script:
         inputs:
         - content: git clone -b flavors $BITRISE_SAMPLE_APP .
-    - install-missing-android-tools@2.3.4:
+    - install-missing-android-tools:
         run_if: .IsCI
     - path::./:
         title: Test simple android project
