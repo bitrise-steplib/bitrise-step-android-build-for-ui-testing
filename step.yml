@@ -35,7 +35,6 @@ inputs:
         Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
       description: |
         Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
-      is_required: true
   - variant: ""
     opts:
       title: Variant

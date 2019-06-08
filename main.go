@@ -29,7 +29,7 @@ type Configs struct {
 	ProjectLocation string `env:"project_location,dir"`
 	APKPathPattern  string `env:"apk_path_pattern"`
 	Variant         string `env:"variant,required"`
-	Module          string `env:"module,required"`
+	Module          string `env:"module"`
 	Arguments       string `env:"arguments"`
 	CacheLevel      string `env:"cache_level,opt[none,only_deps,all]"`
 	DeployDir       string `env:"BITRISE_DEPLOY_DIR,dir"`
