@@ -9,11 +9,11 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/bitrise-tools/go-android"
+  name = "github.com/bitrise-io/go-android"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/bitrise-tools/go-steputils"
+  name = "github.com/bitrise-io/go-steputils"
 
 [[constraint]]
   branch = "master"
