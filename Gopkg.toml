@@ -4,10 +4,6 @@
   name = "github.com/bitrise-io/go-utils"
 
 [[constraint]]
-  name = "github.com/bitrise-steplib/bitrise-step-android-unit-test"
-  version = "0.9.5"
-
-[[constraint]]
   branch = "master"
   name = "github.com/bitrise-io/go-android"
 
