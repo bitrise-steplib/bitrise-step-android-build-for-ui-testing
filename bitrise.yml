@@ -12,6 +12,9 @@ workflows:
     - go-list:
     - golint:
     - errcheck:
+        # ubuntu lts stacks have an old go version which causes errcheck command failure
+        run_if: |-
+          {{ not (enveq "BITRISEIO_STACK_ID" "linux-docker-android-lts") }}
     - go-test:
     
   test:

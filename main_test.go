@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitrise-tools/go-android/gradle"
+	"github.com/bitrise-io/go-android/gradle"
 )
 
 func Test_androidTestVariantPairs(t *testing.T) {
