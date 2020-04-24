@@ -3,8 +3,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing.git
-  - BITRISE_SAMPLE_APP: https://github.com/bitrise-steplib/android-multiple-test-results-sample.git
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-io/bitrise-step-android-build-for-ui-testing.git
+  - BITRISE_SAMPLE_APP: https://github.com/bitrise-io/android-multiple-test-results-sample.git
   - BITRISE_SAMPLE_APP_BRANCH: maintenance
 
 workflows:
