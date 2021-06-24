@@ -1,114 +1,42 @@
-format_version: 6
+format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
-app:
-  envs:
-  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-io/bitrise-step-android-build-for-ui-testing.git
-  - BITRISE_SAMPLE_APP: https://github.com/bitrise-io/android-multiple-test-results-sample.git
-  - BITRISE_SAMPLE_APP_BRANCH: maintenance
-
 workflows:
-  go-tests:
+  check:
     steps:
-    - go-list:
-    - golint:
-    - errcheck:
-        # ubuntu lts stacks have an old go version which causes errcheck command failure
-        run_if: |-
-          {{ not (enveq "BITRISEIO_STACK_ID" "linux-docker-android-lts") }}
-    - go-test:
-    
+      - git::https://github.com/bitrise-steplib/steps-check.git: { }
+
+  e2e:
+    steps:
+      - git::https://github.com/bitrise-steplib/steps-check.git:
+          inputs:
+            - workflow: e2e
+
   test:
-    before_run:
-    - audit-this-step
-    - go-tests
     after_run:
-    - test_app
-    - test_another_app
+      - check
+      - e2e
 
-  test_xcode_8:
-    before_run:
-    - audit-this-step
+  sample:
+    envs:
+      - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
+      - TEST_APP_BRANCH: maintenance
     steps:
-    - go-list:
-    - go-test:
-    after_run:
-    - test_app
-    - test_another_app
-
-  test_app:
-    title: Test simple android project & mono repo projects in source dir
-    steps:
-    - script:
-        inputs:
-        - content: rm -rf _tmp
-    - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp
-        run_if: true
-        inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - script:
-        inputs:
-        - content: git clone -b $BITRISE_SAMPLE_APP_BRANCH $BITRISE_SAMPLE_APP .
-    - install-missing-android-tools:
-        run_if: .IsCI
-    - path::./:
-        title: Test simple android project
-        inputs:
-        - project_location: $BITRISE_SOURCE_DIR
-        - module: app
-        - variant: DemoDebug
-    - script:
-        title: Check outputs
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-
-            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
-            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
-
-  test_another_app:
-    title: Test simple android project & mono repo projects in source dir
-    steps:
-    - script:
-        inputs:
-        - content: rm -rf _tmp
-    - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp
-        run_if: true
-        inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - script:
-        inputs:
-        - content: git clone -b $BITRISE_SAMPLE_APP_BRANCH $BITRISE_SAMPLE_APP .
-    - install-missing-android-tools:
-        run_if: .IsCI
-    - path::./:
-        title: Test simple android project
-        inputs:
-        - project_location: $BITRISE_SOURCE_DIR
-        - module: another_app
-        - variant: AnotherDemoDebug
-    - script:
-        title: Check outputs
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-
-            if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
-            if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
-
-  # ----------------------------------------------------------------
-  # --- workflows to Share this step into a Step Library
-  audit-this-step:
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            stepman audit --step-yml ./step.yml
+      - script:
+          inputs:
+            - content: |-
+                #!/bin/env bash
+                set -ex
+                rm -rf ./_tmp
+      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git@master:
+          inputs:
+            - repository_url: $TEST_APP_URL
+            - branch: $TEST_APP_BRANCH
+            - clone_into_dir: ./_tmp
+      - install-missing-android-tools:
+          run_if: .IsCI
+      - path::./:
+          inputs:
+            - project_location: ./_tmp
+            - module: app
+            - variant: DemoDebug
