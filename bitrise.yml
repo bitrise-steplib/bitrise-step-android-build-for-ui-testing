@@ -35,6 +35,8 @@ workflows:
             - clone_into_dir: ./_tmp
       - install-missing-android-tools:
           run_if: .IsCI
+          inputs:
+            - gradlew_path: ./_tmp/gradlew
       - path::./:
           inputs:
             - project_location: ./_tmp
