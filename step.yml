@@ -1,7 +1,26 @@
+title: "Android Build for UI Testing"
+summary: |-
+  Builds your Android project with Gradle with the belonging AndroidTest variant.
+description: |-
+  [This Step](https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing) generates all the APKs you need to run instrumentation tests for your Android app: both an APK from your app and the belonging test APK, for example,  `:app:assembleDemoDebug`, `:app:assembleDemoDebugAndroidTest`
+   
+   ### Configuring the Step
+   1. Add the **Project Location** which is the root directory of your Android project.
+   2. Set the **Module** you want to build. To see your available modules, open your project in Android Studio and go to **Project Structure** and see the list on the left.
+   3. Set the **Variant** you want to build. To see your available variants, open your project in Android Studio and go to **Project Structure** and then the **variants** section.
+   Under **Options**:
+   4. Set the **APK location pattern**: Once the build has run, the Step finds the APK files with the given pattern.
+   5. **Set the level of cache** where `all` caches build cache and dependencies, `only_deps` caches dependencies only, `none` does not cache anything.
+   6. If you wish to pass any extra Gradle arguments to the gradle task, you can add those in the **Additional Gradle Arguments** input.
 
-title: Android Build for UI Testing
-summary: Builds your Android project with gradle with the belonging AndroidTest variant.
-description: Builds your Android project with gradle with the belonging AndroidTest variant.
+   ### Useful links
+  - [Testing with Bitrise](https://devcenter.bitrise.io/testing/testing-index/)
+  - [Deploying an Android app with Bitrise](https://devcenter.bitrise.io/deploy/android-deploy/android-deployment-index/)
+
+  ### Related Steps
+  - [Android Build](https://www.bitrise.io/integrations/steps/android-build)
+  - [Gradle Runner](https://www.bitrise.io/integrations/steps/gradle-runner)
+
 website: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing/issues
