@@ -1,0 +1,60 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+    # Shared test configs
+    - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
+    - TEST_APP_BRANCH: maintenance
+
+workflows:
+  test_app:
+    envs:
+      - TEST_APP_MODULE: app
+      - TEST_APP_VARIANT: DemoDebug
+    after_run:
+      - _run
+      - _check_outputs
+
+  test_another_app:
+    envs:
+      - TEST_APP_MODULE: another_app
+      - TEST_APP_VARIANT: AnotherDemoDebug
+    after_run:
+      - _run
+      - _check_outputs
+
+  _run:
+    steps:
+      - script:
+          inputs:
+            - content: |-
+                #!/bin/env bash
+                set -ex
+                rm -rf ./_tmp
+      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git@master:
+          inputs:
+            - repository_url: $TEST_APP_URL
+            - branch: $TEST_APP_BRANCH
+            - clone_into_dir: ./_tmp
+      - install-missing-android-tools:
+          run_if: .IsCI
+          inputs:
+            - gradlew_path: ./_tmp/gradlew
+      - path::./:
+          inputs:
+            - project_location: ./_tmp
+            - module: $TEST_APP_MODULE
+            - variant: $TEST_APP_VARIANT
+
+  _check_outputs:
+    steps:
+      - script:
+          title: Check outputs
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -ex
+
+                if [ -z "$BITRISE_APK_PATH" ] ; then echo "BITRISE_APK_PATH env is empty" ; exit 1 ; fi ;
+                if [ -z "$BITRISE_TEST_APK_PATH" ] ; then echo "BITRISE_TEST_APK_PATH env is empty" ; exit 1 ; fi ;
