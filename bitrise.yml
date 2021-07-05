@@ -12,16 +12,6 @@ workflows:
           inputs:
             - workflow: e2e
 
-  test:
-    after_run:
-      - check
-      - e2e
-
-  test_xcode_8:
-    after_run:
-      - check
-      - e2e
-
   sample:
     envs:
       - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
