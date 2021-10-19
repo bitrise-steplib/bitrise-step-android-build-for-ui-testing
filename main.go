@@ -88,9 +88,9 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	var testVariant string
 	var appVariant string
 	for _, v := range variantsMap[module] {
-		if strings.ToLower(v) == strings.ToLower(variant) {
+		if strings.EqualFold(v, variant) {
 			appVariant = v
-		} else if strings.ToLower(v) == strings.ToLower(variant+testSuffix) {
+		} else if strings.EqualFold(v, variant+testSuffix) {
 			testVariant = v
 		}
 	}
