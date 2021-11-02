@@ -44,14 +44,12 @@ inputs:
 - project_location: $BITRISE_SOURCE_DIR
   opts:
     title: Project Location
-    description: The root directory of your android project, for example, where your root build gradle file exist (also gradlew, settings.gradle, etc...)
+    summary: The root directory of your android project, for example, where your root build gradle file exist (also gradlew, settings.gradle, etc...)
     is_required: true
 - module: ""
   opts:
     title: Module
     summary: |
-      Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
-    description: |
       Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
     is_required: true
 - variant: ""
@@ -59,15 +57,12 @@ inputs:
     title: Variant
     summary: |
       Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
-    description: |
-      Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
     is_required: true
 - apk_path_pattern: "*/build/outputs/apk/*.apk"
   opts:
     category: Options
     title: APK location pattern
     summary: Will find the APK files with the given pattern.
-    description: Will find the APK files with the given pattern.
     is_required: true
 - cache_level: only_deps
   opts:
@@ -87,7 +82,6 @@ inputs:
     category: Options
     title: Additional Gradle Arguments
     summary: Extra arguments passed to the gradle task
-    description: Extra arguments passed to the gradle task
     is_required: false
 outputs:
 - BITRISE_APK_PATH:
