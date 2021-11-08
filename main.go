@@ -13,6 +13,8 @@ import (
 	utilscache "github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/tools"
+	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
@@ -36,6 +38,9 @@ type Configs struct {
 	DeployDir       string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
+var cmdFactory = command.NewFactory(env.NewRepository())
+var logger = log.NewLogger(false)
+
 func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string, includeModule bool) (artifacts []gradle.Artifact, err error) {
 	artifacts, err = gradleProject.FindArtifacts(started, pattern, includeModule)
 	if err != nil {
@@ -43,12 +48,12 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 	}
 	if len(artifacts) == 0 {
 		if !started.IsZero() {
-			log.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
-			log.Warnf("Retrying without modtime check....")
+			logger.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
+			logger.Warnf("Retrying without modtime check....")
 			fmt.Println()
 			return getArtifacts(gradleProject, time.Time{}, pattern, includeModule)
 		}
-		log.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
+		logger.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
 	}
 
 	return
@@ -71,10 +76,10 @@ func exportArtifacts(artifacts []gradle.Artifact, deployDir string) ([]string, e
 			artifact.Name = fmt.Sprintf("%s-%s%s", name, timestamp, ext)
 		}
 
-		log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
+		logger.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
 
 		if err := artifact.Export(deployDir); err != nil {
-			log.Warnf("failed to export artifact (%s), error: %v", artifact.Path, err)
+			logger.Warnf("failed to export artifact (%s), error: %v", artifact.Path, err)
 			continue
 		}
 
@@ -134,17 +139,21 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 }
 
 func mainE(config Configs) error {
-	gradleProject, err := gradle.NewProject(config.ProjectLocation)
+	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
 		return fmt.Errorf("Failed to open project, error: %s", err)
 	}
 
-	buildTask := gradleProject.
-		GetTask("assemble")
+	buildTask := gradleProject.GetTask("assemble")
 
-	log.Infof("Variants:")
+	args, err := shellquote.Split(config.Arguments)
+	if err != nil {
+		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+	}
 
-	variants, err := buildTask.GetVariants()
+	logger.Infof("Variants:")
+
+	variants, err := buildTask.GetVariants(args...)
 	if err != nil {
 		return fmt.Errorf("Failed to fetch variants, error: %s", err)
 	}
@@ -158,9 +167,9 @@ func mainE(config Configs) error {
 	if err != nil {
 		// List all the variants if there is an error
 		for module, variants := range variants {
-			log.Printf("%s:", module)
+			logger.Printf("%s:", module)
 			for _, variant := range variants {
-				log.Printf("- %s", variant)
+				logger.Printf("- %s", variant)
 			}
 		}
 		fmt.Println()
@@ -170,28 +179,23 @@ func mainE(config Configs) error {
 
 	// List the variants only which has (Build - AndroidTest) variant pair
 	for module, variants := range variantPairs {
-		log.Printf("%s:", module)
+		logger.Printf("%s:", module)
 		for _, variant := range variants {
 			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
-				log.Donef("✓ %s", variant)
+				logger.Donef("✓ %s", variant)
 				continue
 			}
-			log.Printf("- %s", variant)
+			logger.Printf("- %s", variant)
 		}
 		fmt.Println()
 	}
 
 	started := time.Now()
 
-	args, err := shellquote.Split(config.Arguments)
-	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
-	}
-
-	log.Infof("Run build:")
+	logger.Infof("Run build:")
 	buildCommand := buildTask.GetCommand(filteredVariants, args...)
 
-	log.Donef("$ " + buildCommand.PrintableCommandArgs())
+	logger.Donef("$ " + buildCommand.PrintableCommandArgs())
 	fmt.Println()
 
 	if err := buildCommand.Run(); err != nil {
@@ -200,7 +204,7 @@ func mainE(config Configs) error {
 
 	fmt.Println()
 
-	log.Infof("Export APKs:")
+	logger.Infof("Export APKs:")
 	fmt.Println()
 
 	apks, err := getArtifacts(gradleProject, started, config.APKPathPattern, false)
@@ -235,12 +239,12 @@ func mainE(config Configs) error {
 	if err := tools.ExportEnvironmentWithEnvman(apkEnvKey, exportedAppArtifact); err != nil {
 		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
 	}
-	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", apkEnvKey, filepath.Base(exportedAppArtifact))
+	logger.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", apkEnvKey, filepath.Base(exportedAppArtifact))
 
 	if err := tools.ExportEnvironmentWithEnvman(testApkEnvKey, exportedTestArtifact); err != nil {
 		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
 	}
-	log.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", testApkEnvKey, filepath.Base(exportedTestArtifact))
+	logger.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", testApkEnvKey, filepath.Base(exportedTestArtifact))
 
 	var paths, sep string
 	for _, path := range exportedArtifactPaths {
@@ -253,7 +257,7 @@ func mainE(config Configs) error {
 }
 
 func failf(s string, args ...interface{}) {
-	log.Errorf(s, args...)
+	logger.Errorf(s, args...)
 	os.Exit(1)
 }
 
@@ -273,10 +277,10 @@ func main() {
 	}
 
 	fmt.Println()
-	log.Infof("Collecting cache:")
-	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel)); warning != nil {
-		log.Warnf("%s", warning)
+	logger.Infof("Collecting cache:")
+	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel), cmdFactory); warning != nil {
+		logger.Warnf("%s", warning)
 	}
 
-	log.Donef("  Done")
+	logger.Donef("  Done")
 }
