@@ -62,6 +62,7 @@ workflows:
         - project_location: ./_tmp
         - module: $TEST_APP_MODULE
         - variant: $TEST_APP_VARIANT
+        - arguments: --warn
 
   _check_outputs:
     steps:
