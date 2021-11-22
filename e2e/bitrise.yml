@@ -25,6 +25,10 @@ workflows:
 
   _run:
     steps:
+    - set-java-version:
+        title: Set JDK11 (required for VS4Mac stack)
+        inputs:
+        - set_java_version: 11
     - script:
         inputs:
         - content: |-
