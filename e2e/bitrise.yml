@@ -7,7 +7,7 @@ workflows:
     - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
     - TEST_APP_BRANCH: master
     - TEST_APP_MODULE: app
-    - TEST_APP_VARIANT: DemoDebug
+    - TEST_APP_VARIANT: debug
     after_run:
     - _run
     - _check_outputs
