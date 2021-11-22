@@ -41,7 +41,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `project_location` | The root directory of your android project, for example, where your root build gradle file exist (also gradlew, settings.gradle, etc...) | required | `$BITRISE_SOURCE_DIR` |
-| `module` | Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.  | required |  |
+| `module` | Set the module to build. Valid syntax examples: `app`, `feature:nested-module`  To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.  | required |  |
 | `variant` | Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.  | required |  |
 | `apk_path_pattern` | Will find the APK files with the given pattern. | required | `*/build/outputs/apk/*.apk` |
 | `cache_level` | `all` - will cache build cache and dependencies `only_deps` - will cache dependencies only `none` - will not cache anything | required | `only_deps` |

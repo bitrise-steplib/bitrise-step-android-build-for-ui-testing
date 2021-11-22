@@ -139,6 +139,8 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 }
 
 func mainE(config Configs) error {
+	started := time.Now()
+
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
 		return fmt.Errorf("Failed to open project, error: %s", err)
@@ -152,6 +154,8 @@ func mainE(config Configs) error {
 	}
 
 	logger.Infof("Variants:")
+	logger.Printf("Reading Gradle project structure, this might take a while...")
+	logger.Println()
 
 	variants, err := buildTask.GetVariants(args...)
 	if err != nil {
@@ -190,8 +194,6 @@ func mainE(config Configs) error {
 		fmt.Println()
 	}
 
-	started := time.Now()
-
 	logger.Infof("Run build:")
 	buildCommand := buildTask.GetCommand(filteredVariants, args...)
 
@@ -204,13 +206,19 @@ func mainE(config Configs) error {
 
 	fmt.Println()
 
-	logger.Infof("Export APKs:")
-	fmt.Println()
-
+	logger.Infof("APKs found after the build:")
 	apks, err := getArtifacts(gradleProject, started, config.APKPathPattern, false)
 	if err != nil {
-		return fmt.Errorf("failed to find apks, error: %v", err)
+		return fmt.Errorf("failed to find APKs: %v", err)
 	}
+
+	for i, apk := range apks {
+		logger.Printf("%d. %s", i+1, apk.Path)
+	}
+
+	fmt.Println()
+	logger.Infof("Export APKs:")
+	fmt.Println()
 
 	exportedArtifactPaths, err := exportArtifacts(apks, config.DeployDir)
 	if err != nil {
@@ -220,7 +228,7 @@ func mainE(config Configs) error {
 	var exportedAppArtifact string
 	var exportedTestArtifact string
 	for _, pth := range exportedArtifactPaths {
-		if strings.HasSuffix(strings.ToLower(path.Base(pth)), strings.ToLower("AndroidTest.apk")) {
+		if strings.HasSuffix(strings.ToLower(path.Base(pth)), "androidtest.apk") {
 			exportedTestArtifact = pth
 		} else {
 			exportedAppArtifact = pth
@@ -251,7 +259,6 @@ func mainE(config Configs) error {
 		paths += sep + "$BITRISE_DEPLOY_DIR/" + filepath.Base(path)
 		sep = "| \\\n" + strings.Repeat(" ", 11)
 	}
-	fmt.Println()
 
 	return nil
 }

@@ -1,47 +1,30 @@
 format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
-app:
-  envs:
-  # Shared test configs
-  - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
-  - TEST_APP_BRANCH: maintenance
-
 workflows:
   test_app:
     envs:
+    - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
+    - TEST_APP_BRANCH: maintenance
     - TEST_APP_MODULE: app
     - TEST_APP_VARIANT: DemoDebug
     after_run:
     - _run
     - _check_outputs
 
-  test_another_app:
+  test_library_module:
     envs:
-    - TEST_APP_MODULE: another_app
-    - TEST_APP_VARIANT: AnotherDemoDebug
+    - TEST_APP_URL: https://github.com/bitrise-io/Bitrise-Android-Modules-Sample.git
+    - TEST_APP_BRANCH: main
+    - TEST_APP_MODULE: feature:example1
+    - TEST_APP_VARIANT: debug
+    - GRADLE_ARGUMENTS: ":app:assembleDebug"  # workaround for building a main app for a library module
     after_run:
     - _run
     - _check_outputs
 
   _run:
     steps:
-    - script:
-        run_if: $.IsCI
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-            if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-              sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
-              sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
-              export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
-              envman add --key JAVA_HOME --value "/usr/lib/jvm/java-11-openjdk-amd64"
-            elif [[ "$OSTYPE" == "darwin"* ]]; then
-              jenv global 11
-              export JAVA_HOME="$(jenv prefix)"
-              envman add --key JAVA_HOME --value "$(jenv prefix)"
-            fi
     - script:
         inputs:
         - content: |-
@@ -62,7 +45,7 @@ workflows:
         - project_location: ./_tmp
         - module: $TEST_APP_MODULE
         - variant: $TEST_APP_VARIANT
-        - arguments: --warn
+        - arguments: $GRADLE_ARGUMENTS --warn
 
   _check_outputs:
     steps:
