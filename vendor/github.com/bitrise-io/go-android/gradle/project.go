@@ -93,6 +93,7 @@ func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string, incl
 
 		if info.ModTime().Before(generatedAfter) {
 			log.Warnf("Ignoring %s because it was created by a previous step based on the file modification time", info.Name())
+			return nil
 		}
 
 		name, err := proj.extractArtifactName(path, includeModuleInName)

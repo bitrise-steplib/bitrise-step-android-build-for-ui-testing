@@ -18,7 +18,7 @@ workflows:
     - TEST_APP_BRANCH: main
     - TEST_APP_MODULE: feature:example1
     - TEST_APP_VARIANT: debug
-    - GRADLE_ARGUMENTS: ":app:assembleDebug"  # workaround for building a main app for a library module
+    - GRADLE_ARGUMENTS: :app:assembleDebug  # workaround for building a main app for a library module
     after_run:
     - _run
     - _check_outputs
