@@ -49,8 +49,11 @@ inputs:
 - module: ""
   opts:
     title: Module
-    summary: |
-      Set the module that you want to build. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
+    summary: "Set the module to build. Valid syntax examples: `app`, `feature:nested-module`"
+    description: |
+      Set the module to build. Valid syntax examples: `app`, `feature:nested-module`
+
+      To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
     is_required: true
 - variant: ""
   opts:

@@ -1,25 +1,24 @@
 format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
-app:
-  envs:
-  # Shared test configs
-  - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
-  - TEST_APP_BRANCH: maintenance
-
 workflows:
   test_app:
     envs:
+    - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
+    - TEST_APP_BRANCH: maintenance
     - TEST_APP_MODULE: app
     - TEST_APP_VARIANT: DemoDebug
     after_run:
     - _run
     - _check_outputs
 
-  test_another_app:
+  test_library_module:
     envs:
-    - TEST_APP_MODULE: another_app
-    - TEST_APP_VARIANT: AnotherDemoDebug
+    - TEST_APP_URL: https://github.com/bitrise-io/Bitrise-Android-Modules-Sample.git
+    - TEST_APP_BRANCH: main
+    - TEST_APP_MODULE: feature:example1
+    - TEST_APP_VARIANT: debug
+    - GRADLE_ARGUMENTS: :app:assembleDebug  # workaround for building a main app for a library module
     after_run:
     - _run
     - _check_outputs
@@ -62,7 +61,7 @@ workflows:
         - project_location: ./_tmp
         - module: $TEST_APP_MODULE
         - variant: $TEST_APP_VARIANT
-        - arguments: --warn
+        - arguments: $GRADLE_ARGUMENTS --warn
 
   _check_outputs:
     steps:

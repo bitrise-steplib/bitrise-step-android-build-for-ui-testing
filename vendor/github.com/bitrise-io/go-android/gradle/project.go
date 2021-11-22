@@ -87,7 +87,12 @@ func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string, incl
 			return nil
 		}
 
-		if info.ModTime().Before(generatedAfter) || info.IsDir() || !glob.Glob(pattern, path) {
+		if info.IsDir() || !glob.Glob(pattern, path) {
+			return nil
+		}
+
+		if info.ModTime().Before(generatedAfter) {
+			log.Warnf("Ignoring %s because it was created by a previous step based on the file modification time", info.Name())
 			return nil
 		}
 
