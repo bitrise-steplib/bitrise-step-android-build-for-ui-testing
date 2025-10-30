@@ -22,7 +22,7 @@ workflows:
     - _run
     - _check_outputs
     steps:
-      - path::./:
+    - path::./:
         inputs:
         - project_location: ./_tmp
         - module: $TEST_APP_MODULE
