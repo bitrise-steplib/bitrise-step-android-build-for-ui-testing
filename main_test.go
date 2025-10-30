@@ -158,3 +158,40 @@ func wantVariantFilterForAnotherApp() gradle.Variants {
 	want["another_app"] = []string{"AnotherDemoDebug", "AnotherDemoDebugAndroidTest"}
 	return want
 }
+
+func Test_isTestModule(t *testing.T) {
+	tests := []struct {
+		name    string
+		apkPath string
+		want    bool
+	}{
+		{
+			name:    "test module apk",
+			apkPath: "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+			want:    true,
+		},
+		{
+			name:    "test module apk, lowercased",
+			apkPath: "app/build/outputs/apk/androidTest/debug/app-debug-androidtest.apk",
+			want:    true,
+		},
+		{
+			name:    "test module apk with timestamp",
+			apkPath: "app/build/outputs/apk/androidTest/debug/app-debug-androidTest-20250904183958.apk",
+			want:    true,
+		},
+		{
+			name:    "non-test apk",
+			apkPath: "app/build/outputs/apk/debug/app-debug.apk",
+			want:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isTestAPK(tt.apkPath)
+			if got != tt.want {
+				t.Errorf("isTestModule() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

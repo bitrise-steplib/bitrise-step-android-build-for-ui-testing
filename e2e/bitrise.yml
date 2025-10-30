@@ -12,15 +12,22 @@ workflows:
     - _run
     - _check_outputs
 
-  # test_two_steps_in_workflow:
-  #   envs:
-  #   - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
-  #   - TEST_APP_BRANCH: maintenance
-  #   - TEST_APP_MODULE: app
-  #   - TEST_APP_VARIANT: DemoDebug
-  #   after_run:
-  #   - _run
-  #   - _check_outputs
+  test_two_steps_in_workflow:
+    envs:
+    - TEST_APP_URL: https://github.com/bitrise-io/android-multiple-test-results-sample.git
+    - TEST_APP_BRANCH: maintenance
+    - TEST_APP_MODULE: app
+    - TEST_APP_VARIANT: DemoDebug
+    before_run:
+    - _run
+    - _check_outputs
+    steps:
+      - path::./:
+        inputs:
+        - project_location: ./_tmp
+        - module: $TEST_APP_MODULE
+        - variant: $TEST_APP_VARIANT
+        - arguments: $GRADLE_ARGUMENTS --warn
 
   test_library_module:
     envs:
