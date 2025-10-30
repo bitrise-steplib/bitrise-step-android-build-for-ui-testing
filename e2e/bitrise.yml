@@ -8,7 +8,8 @@ workflows:
     - TEST_APP_BRANCH: maintenance
     - TEST_APP_MODULE: app
     - TEST_APP_VARIANT: DemoDebug
-    after_run:
+    - JDK_VERSION: 17
+    before_run:
     - _run
     - _check_outputs
 
@@ -18,6 +19,7 @@ workflows:
     - TEST_APP_BRANCH: maintenance
     - TEST_APP_MODULE: app
     - TEST_APP_VARIANT: DemoDebug
+    - JDK_VERSION: 17
     before_run:
     - _run
     - _check_outputs
@@ -36,16 +38,17 @@ workflows:
     - TEST_APP_MODULE: feature:example1
     - TEST_APP_VARIANT: debug
     - GRADLE_ARGUMENTS: :app:assembleDebug  # workaround for building a main app for a library module
-    after_run:
+    - JDK_VERSION: 21
+    before_run:
     - _run
     - _check_outputs
 
   _run:
     steps:
-    # - set-java-version@1:
-    #     run_if: $.IsCI
-    #     inputs:
-    #     - java_version: 17
+    - set-java-version@1:
+        run_if: $.IsCI
+        inputs:
+        - java_version: $JDK_VERSION
     - script@1:
         inputs:
         - content: |-
