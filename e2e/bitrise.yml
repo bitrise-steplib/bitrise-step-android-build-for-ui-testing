@@ -42,10 +42,10 @@ workflows:
 
   _run:
     steps:
-    - set-java-version@1:
-        run_if: $.IsCI
-        inputs:
-        - java_version: 11
+    # - set-java-version@1:
+    #     run_if: $.IsCI
+    #     inputs:
+    #     - java_version: 17
     - script@1:
         inputs:
         - content: |-
