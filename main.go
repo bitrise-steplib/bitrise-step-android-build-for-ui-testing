@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -138,6 +139,14 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 	return variantPairs, nil
 }
 
+func isTestAPK(apkPath string) bool {
+	// Example names:
+	// app-debug-androidTest.apk
+	// app-debug-androidTest-20250904183958.apk (timestamped, when duplicate)
+	testArtifactRegexp := regexp.MustCompile(`(?i).*android[tT]est.*\.apk$`)
+	return testArtifactRegexp.MatchString(path.Base(apkPath))
+}
+
 func mainE(config Configs) error {
 	started := time.Now()
 
@@ -228,7 +237,7 @@ func mainE(config Configs) error {
 	var exportedAppArtifact string
 	var exportedTestArtifact string
 	for _, pth := range exportedArtifactPaths {
-		if strings.HasSuffix(strings.ToLower(path.Base(pth)), "androidtest.apk") {
+		if isTestAPK(pth) {
 			exportedTestArtifact = pth
 		} else {
 			exportedAppArtifact = pth
