@@ -26,6 +26,10 @@ source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-build-f
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing/issues
 project_type_tags:
 - android
+- cordova
+- flutter
+- ionic
+- kotlin-multiplatform
 - react-native
 
 type_tags:
