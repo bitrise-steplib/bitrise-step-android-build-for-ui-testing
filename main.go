@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
+
 	shellquote "github.com/kballard/go-shellquote"
 )
 
@@ -130,7 +131,7 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 	variantPairs := gradle.Variants{}
 	for m, appVariant := range appVariants {
 		for _, variant := range appVariant {
-			if sliceutil.IsStringInSlice(variant+testSuffix, testVariants[m]) {
+			if slices.Contains(testVariants[m], variant+testSuffix) {
 				variantPairs[m] = append(variantPairs[m], []string{variant, variant + testSuffix}...)
 			}
 		}
@@ -194,7 +195,7 @@ func mainE(config Configs) error {
 	for module, variants := range variantPairs {
 		logger.Printf("%s:", module)
 		for _, variant := range variants {
-			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
+			if slices.Contains(filteredVariants[module], variant) {
 				logger.Donef("✓ %s", variant)
 				continue
 			}
