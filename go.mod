@@ -1,6 +1,6 @@
 module github.com/bitrise-steplib/bitrise-step-android-build-for-ui-testing
 
-go 1.16
+go 1.21
 
 require (
 	github.com/bitrise-io/go-android v0.0.0-20211122121320-da1559f13057
