@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-io/bitrise-build-cache-cli/v2/pkg/reactnative/wrap"
 	"github.com/bitrise-io/go-android/cache"
 	"github.com/bitrise-io/go-android/gradle"
 	utilscache "github.com/bitrise-io/go-steputils/cache"
@@ -205,7 +207,32 @@ func mainE(config Configs) error {
 	}
 
 	logger.Infof("Run build:")
-	buildCommand := buildTask.GetCommand(filteredVariants, args...)
+
+	// Inline of buildTask.GetCommand(filteredVariants, args...) so the gradlew
+	// path and argv are explicit — needed to route the invocation through
+	// `bitrise-build-cache react-native run -- ...` when RN cache is active.
+	gradlewPath := filepath.Join(config.ProjectLocation, "gradlew")
+	var taskNames []string
+	for module, variants := range filteredVariants {
+		modulePrefix := ""
+		if module != "" {
+			modulePrefix = ":" + module + ":"
+		}
+		for _, variant := range variants {
+			taskNames = append(taskNames, modulePrefix+"assemble"+variant)
+		}
+	}
+	gradleArgs := append(taskNames, args...)
+	det := wrap.Detect(context.Background(), wrap.DetectParams{Logger: logger})
+	if det.ReactNativeEnabled {
+		logger.Infof("Bitrise Build Cache: React Native cache active — wrapping gradle with %s", det.CLIPath)
+	}
+	name, wrappedArgs := wrap.Wrap(det, gradlewPath, gradleArgs)
+	buildCommand := cmdFactory.Create(name, wrappedArgs, &command.Opts{
+		Dir:    config.ProjectLocation,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	})
 
 	logger.Donef("$ " + buildCommand.PrintableCommandArgs())
 	fmt.Println()
