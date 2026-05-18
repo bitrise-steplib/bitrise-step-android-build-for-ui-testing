@@ -321,7 +321,8 @@ func main() {
 	fmt.Println()
 
 	if err := mainE(config); err != nil {
-		failf("%s", err)
+		msg := err.Error()
+		failf("%s%s", strings.ToUpper(msg[:1]), msg[1:])
 	}
 
 	fmt.Println()
