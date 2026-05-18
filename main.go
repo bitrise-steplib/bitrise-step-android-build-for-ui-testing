@@ -117,7 +117,7 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 }
 
 // androidTestVariantPairs returns (build - AndroidTest) variant pairs
-func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle.Variants, error) {
+func androidTestVariantPairs(variantsMap gradle.Variants) (gradle.Variants, error) {
 	appVariants := gradle.Variants{}
 	testVariants := gradle.Variants{}
 	for m, variants := range variantsMap {
@@ -155,14 +155,14 @@ func mainE(config Configs) error {
 
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
-		return fmt.Errorf("Failed to open project, error: %s", err)
+		return fmt.Errorf("failed to open project, error: %s", err)
 	}
 
 	buildTask := gradleProject.GetTask("assemble")
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+		return fmt.Errorf("failed to parse arguments, error: %s", err)
 	}
 
 	logger.Infof("Variants:")
@@ -171,10 +171,10 @@ func mainE(config Configs) error {
 
 	variants, err := buildTask.GetVariants(args...)
 	if err != nil {
-		return fmt.Errorf("Failed to fetch variants, error: %s", err)
+		return fmt.Errorf("failed to fetch variants, error: %s", err)
 	}
 
-	variantPairs, err := androidTestVariantPairs(config.Module, variants)
+	variantPairs, err := androidTestVariantPairs(variants)
 	if err != nil {
 		return fmt.Errorf("Failed to find variant pairs (build and AndroidTest variant), error: %s", err)
 	}
