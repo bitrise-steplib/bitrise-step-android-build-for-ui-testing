@@ -117,7 +117,7 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 }
 
 // androidTestVariantPairs returns (build - AndroidTest) variant pairs
-func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle.Variants, error) {
+func androidTestVariantPairs(variantsMap gradle.Variants) gradle.Variants {
 	appVariants := gradle.Variants{}
 	testVariants := gradle.Variants{}
 	for m, variants := range variantsMap {
@@ -139,7 +139,7 @@ func androidTestVariantPairs(module string, variantsMap gradle.Variants) (gradle
 		}
 	}
 
-	return variantPairs, nil
+	return variantPairs
 }
 
 func isTestAPK(apkPath string) bool {
@@ -155,14 +155,14 @@ func mainE(config Configs) error {
 
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
-		return fmt.Errorf("Failed to open project, error: %s", err)
+		return fmt.Errorf("failed to open project, error: %s", err)
 	}
 
 	buildTask := gradleProject.GetTask("assemble")
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+		return fmt.Errorf("failed to parse arguments, error: %s", err)
 	}
 
 	logger.Infof("Variants:")
@@ -171,13 +171,10 @@ func mainE(config Configs) error {
 
 	variants, err := buildTask.GetVariants(args...)
 	if err != nil {
-		return fmt.Errorf("Failed to fetch variants, error: %s", err)
+		return fmt.Errorf("failed to fetch variants, error: %s", err)
 	}
 
-	variantPairs, err := androidTestVariantPairs(config.Module, variants)
-	if err != nil {
-		return fmt.Errorf("Failed to find variant pairs (build and AndroidTest variant), error: %s", err)
-	}
+	variantPairs := androidTestVariantPairs(variants)
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
@@ -190,7 +187,7 @@ func mainE(config Configs) error {
 		}
 		fmt.Println()
 
-		return fmt.Errorf("Failed to find buildable variants, error: %s", err)
+		return fmt.Errorf("find buildable variants: %s", err)
 	}
 
 	// List the variants only which has (Build - AndroidTest) variant pair
@@ -245,7 +242,7 @@ func mainE(config Configs) error {
 	fmt.Println()
 
 	if err := buildCommand.Run(); err != nil {
-		return fmt.Errorf("Build task failed, error: %v", err)
+		return fmt.Errorf("build task failed: %v", err)
 	}
 
 	fmt.Println()
@@ -266,7 +263,7 @@ func mainE(config Configs) error {
 
 	exportedArtifactPaths, err := exportArtifacts(apks, config.DeployDir)
 	if err != nil {
-		return fmt.Errorf("Failed to export artifact: %v", err)
+		return fmt.Errorf("failed to export artifact: %v", err)
 	}
 
 	var exportedAppArtifact string
@@ -280,21 +277,21 @@ func mainE(config Configs) error {
 	}
 
 	if exportedAppArtifact == "" {
-		return fmt.Errorf("Could not find the exported app APK")
+		return fmt.Errorf("could not find the exported app APK")
 	}
 
 	if exportedTestArtifact == "" {
-		return fmt.Errorf("Could not find the exported test APK")
+		return fmt.Errorf("could not find the exported test APK")
 	}
 
 	fmt.Println()
 	if err := tools.ExportEnvironmentWithEnvman(apkEnvKey, exportedAppArtifact); err != nil {
-		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
+		return fmt.Errorf("failed to export environment variable: %s", apkEnvKey)
 	}
 	logger.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", apkEnvKey, filepath.Base(exportedAppArtifact))
 
 	if err := tools.ExportEnvironmentWithEnvman(testApkEnvKey, exportedTestArtifact); err != nil {
-		return fmt.Errorf("Failed to export environment variable: %s", apkEnvKey)
+		return fmt.Errorf("failed to export environment variable: %s", apkEnvKey)
 	}
 	logger.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", testApkEnvKey, filepath.Base(exportedTestArtifact))
 
@@ -324,7 +321,8 @@ func main() {
 	fmt.Println()
 
 	if err := mainE(config); err != nil {
-		failf("%s", err)
+		msg := err.Error()
+		failf("%s%s", strings.ToUpper(msg[:1]), msg[1:])
 	}
 
 	fmt.Println()

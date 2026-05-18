@@ -10,40 +10,28 @@ import (
 func Test_androidTestVariantPairs(t *testing.T) {
 	tests := []struct {
 		name        string
-		module      string
 		variantsMap gradle.Variants
 		want        gradle.Variants
-		wantErr     bool
 	}{
 		{
 			name:        "one AndroidTest for app module",
-			module:      "app",
 			variantsMap: oneAndroidTestVariantsMap(),
 			want:        wantOneAndroidTestForApp(),
-			wantErr:     false,
 		},
 		{
 			name:        "one AndroidTest for another_app module",
-			module:      "another_app",
 			variantsMap: oneAndroidTestVariantsMap(),
 			want:        wantOneAndroidTestForAnotherApp(),
-			wantErr:     false,
 		},
 		{
 			name:        "no AndroidTest for another_app module",
-			module:      "another_app",
 			variantsMap: noAndroidTestVariantsMap(),
 			want:        map[string][]string{},
-			wantErr:     false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := androidTestVariantPairs(tt.module, tt.variantsMap)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("androidTestVariantPairs() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := androidTestVariantPairs(tt.variantsMap)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("androidTestVariantPairs() = %v, want %v", got, tt.want)
 			}
