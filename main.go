@@ -292,12 +292,6 @@ func mainE(config Configs) error {
 	}
 	logger.Printf("  Env    [ $%s = $BITRISE_DEPLOY_DIR/%s ]", testApkEnvKey, filepath.Base(exportedTestArtifact))
 
-	var paths, sep string
-	for _, path := range exportedArtifactPaths {
-		paths += sep + "$BITRISE_DEPLOY_DIR/" + filepath.Base(path)
-		sep = "| \\\n" + strings.Repeat(" ", 11)
-	}
-
 	return nil
 }
 
