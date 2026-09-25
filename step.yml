@@ -10,8 +10,7 @@ description: |-
    3. Set the **Variant** you want to build. To see your available variants, open your project in Android Studio and go to **Project Structure** and then the **variants** section.
    Under **Options**:
    4. Set the **APK location pattern**: Once the build has run, the Step finds the APK files with the given pattern.
-   5. **Set the level of cache** where `all` caches build cache and dependencies, `only_deps` caches dependencies only, `none` does not cache anything.
-   6. If you wish to pass any extra Gradle arguments to the gradle task, you can add those in the **Additional Gradle Arguments** input.
+   5. If you wish to pass any extra Gradle arguments to the gradle task, you can add those in the **Additional Gradle Arguments** input.
 
    ### Useful links
   - [Testing with Bitrise](https://devcenter.bitrise.io/testing/testing-index/)
@@ -71,19 +70,6 @@ inputs:
     title: APK location pattern
     summary: Will find the APK files with the given pattern.
     is_required: true
-- cache_level: only_deps
-  opts:
-    category: Options
-    title: Set the level of cache
-    description: |-
-      `all` - will cache build cache and dependencies
-      `only_deps` - will cache dependencies only
-      `none` - will not cache anything
-    is_required: true
-    value_options:
-    - all
-    - only_deps
-    - none
 - arguments:
   opts:
     category: Options
