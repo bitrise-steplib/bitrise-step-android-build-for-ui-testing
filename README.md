@@ -15,8 +15,7 @@ Builds your Android project with Gradle with the belonging AndroidTest variant.
  3. Set the **Variant** you want to build. To see your available variants, open your project in Android Studio and go to **Project Structure** and then the **variants** section.
  Under **Options**:
  4. Set the **APK location pattern**: Once the build has run, the Step finds the APK files with the given pattern.
- 5. **Set the level of cache** where `all` caches build cache and dependencies, `only_deps` caches dependencies only, `none` does not cache anything.
- 6. If you wish to pass any extra Gradle arguments to the gradle task, you can add those in the **Additional Gradle Arguments** input.
+ 5. If you wish to pass any extra Gradle arguments to the gradle task, you can add those in the **Additional Gradle Arguments** input.
 
  ### Useful links
 - [Testing with Bitrise](https://devcenter.bitrise.io/testing/testing-index/)
@@ -44,7 +43,6 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `module` | Set the module to build. Valid syntax examples: `app`, `feature:nested-module`  To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.  | required |  |
 | `variant` | Set the variant that you want to build. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.  | required |  |
 | `apk_path_pattern` | Will find the APK files with the given pattern. | required | `*/build/outputs/apk/*.apk` |
-| `cache_level` | `all` - will cache build cache and dependencies `only_deps` - will cache dependencies only `none` - will not cache anything | required | `only_deps` |
 | `arguments` | Extra arguments passed to the gradle task |  |  |
 </details>
 
